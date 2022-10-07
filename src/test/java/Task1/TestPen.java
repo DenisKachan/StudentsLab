@@ -2,6 +2,8 @@ package Task1;
 
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Optional;
+import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -10,37 +12,54 @@ import java.lang.reflect.Field;
 
 public class TestPen {
 
-    int testPositiveInkContainerValue = 10;
-    int testNegativeInkContainerValue = -1;
-    double testSizeLetter = 2.0;
-    String testColor = "RED";
-
-    //Data for 'writeMethodTest'
-    @DataProvider(name = "dataForWriteMethod")
-    public Object[][] input() {
+    @DataProvider(name = "positiveDataForWriteMethod")
+    public Object[][] inputPositive() {
         return new Object[][]{
-                {-1, 2.0, ""},
-                {10, 1.8, "horse"},
-                {10, 2.4, "hors"},
-                {10, 2.0, "horse"},
-                {5, 2.0, "ho"},
+                {10, 1.8,"horse", "horse"},
+                {10, 2.4,"horse", "hors"},      //bug
+                {10, 2.0,"horse", "horse"},
+                {10,2.0,"horses","horse"},      //bug
+                {5, 2.0,"horse", "ho"},         //bug
+                {10,2.0, " horse", "horse"},    //bug
+                {10,2.0, "horse ", "horse"},    //bug
+                {10, 2.0, "hor se", "hor se"},  //bug
         };
     }
 
+    @DataProvider(name="negativeDataForWriteMethod")
+    public Object[][] inputNegative(){
+        return new Object[][]{
+                {-1,2.0,"horse",""},
+                {10,2.0,"",""},
+                {10,0.0,"horse",""},            //bug
+                {10,-1.0,"horse",""},           //bug
+        };
+    }
+
+    @Parameters({"testPositiveInkContainerValue"})
     @Test(description = "Test of 'isWork' method with positive amount of ink")
-    public void isWorkMethodPositiveTest() {
+    public void isWorkMethodPositiveTest(@Optional("10") int testPositiveInkContainerValue) {
         Pen penWithPositiveInk = new Pen(testPositiveInkContainerValue);
         Assert.assertTrue(penWithPositiveInk.isWork());
     }
 
+    @Parameters({"testNegativeInkContainerValue"})
     @Test(description = "Test of 'isWork' method with negative amount of ink")
-    public void isWorkMethodNegativeTest() {
+    public void isWorkMethodNegativeTest(@Optional("-1") int testNegativeInkContainerValue) {
         Pen penWithNegativeInk = new Pen(testNegativeInkContainerValue);
         Assert.assertFalse(penWithNegativeInk.isWork());
     }
 
+    @Parameters({"testEmptyInkContainerValue"})
+    @Test(description = "Test of 'isWork' method without ink")
+    public void isWorkMethodWithoutInk(@Optional("0") int testEmptyInkContainerValue){
+        Pen penWithoutInk = new Pen(testEmptyInkContainerValue);
+        Assert.assertFalse(penWithoutInk.isWork());
+    }
+
+    @Parameters({"testPositiveInkContainerValue"})
     @Test(description = "Test for a correct work of constructor with 'inkContainerValue' parameter")
-    public void testForConstructorWithInkParameter() throws NoSuchFieldException, IllegalAccessException {
+    public void testForConstructorWithInkParameter(@Optional("10") int testPositiveInkContainerValue) throws NoSuchFieldException, IllegalAccessException {
         Pen penWithEstablishedInk = new Pen(testPositiveInkContainerValue);
         Field inkField = Pen.class.getDeclaredField("inkContainerValue");
         inkField.setAccessible(true);
@@ -48,8 +67,10 @@ public class TestPen {
         Assert.assertEquals(valueOfTheField, testPositiveInkContainerValue);
     }
 
+    @Parameters({"testPositiveInkContainerValue","testSizeLetter"})
     @Test(description = "Test for a correct work of constructor with 'sizeLetter' parameter")
-    public void testForConstructorWithSizeParameter() throws NoSuchFieldException, IllegalAccessException {
+    public void testForConstructorWithSizeParameter(@Optional("10") int testPositiveInkContainerValue,
+                                                    @Optional("2.0") double testSizeLetter) throws NoSuchFieldException, IllegalAccessException {
         Pen penWithEstablishedSizeLetter = new Pen(testPositiveInkContainerValue, testSizeLetter);
         Field sizeField = Pen.class.getDeclaredField("sizeLetter");
         sizeField.setAccessible(true);
@@ -57,8 +78,11 @@ public class TestPen {
         Assert.assertEquals(valueOfTheField, testSizeLetter);
     }
 
+    @Parameters({"testPositiveInkContainerValue","testSizeLetter", "testColor"})
     @Test(description = "Test for a correct work of constructor with 'color' parameter")
-    public void testForConstructorWithColorParameter() throws NoSuchFieldException, IllegalAccessException {
+    public void testForConstructorWithColorParameter(@Optional("10") int testPositiveInkContainerValue,
+                                                     @Optional("2.0") double testSizeLetter,
+                                                     @Optional("RED") String testColor) throws NoSuchFieldException, IllegalAccessException {
         Pen penWithEstablishedColor = new Pen(testPositiveInkContainerValue, testSizeLetter, testColor);
         Field colorField = Pen.class.getDeclaredField("color");
         colorField.setAccessible(true);
@@ -66,8 +90,10 @@ public class TestPen {
         Assert.assertEquals(valueOfTheField, testColor);
     }
 
+    @Parameters({"testPositiveInkContainerValue","testColor"})
     @Test(description = "Test for a correct work of 'doSomethingElse' method")
-    public void doSomethingElseMethodTest() throws NoSuchFieldException, IllegalAccessException {
+    public void doSomethingElseMethodTest(@Optional("10") int testPositiveInkContainerValue,
+                                          @Optional("RED") String testColor) throws NoSuchFieldException, IllegalAccessException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         System.setOut(new PrintStream(byteArrayOutputStream));
         Pen pen = new Pen(testPositiveInkContainerValue);
@@ -79,19 +105,36 @@ public class TestPen {
         System.setOut(null);
     }
 
-    // BUG - 'getColor' method doesn't return current value of 'color' parameter
+    // Bug (description in Readme file)
+    @Parameters({"testPositiveInkContainerValue","testSizeLetter","testColor"})
     @Test(description = "Test for a correct work of 'getColor' method")
-    public void getColorMethodTest() {
+    public void getColorMethodTest(@Optional("10") int testPositiveInkContainerValue,
+                                   @Optional("2.0") double testSizeLetter,
+                                   @Optional("RED") String testColor) {
         Pen penWithEstablishedColor = new Pen(testPositiveInkContainerValue, testSizeLetter, testColor);
         Assert.assertEquals(penWithEstablishedColor.getColor(), testColor);
     }
 
-    // BUG - incorrect work of 'write' method when the product of the length of the word and 'sizeLetter' is more than 'inkContainerValue':
-    // 1) when the 'inkContainerValue' is less or equal than the length of the word - method returns the incorrect value;
-    // 2) when the 'inkContainerValue' is more than the length of the word - IndexOutOfBoundsException.
-    @Test(description = "Test for a correct work of 'write' method", dataProvider = "dataForWriteMethod")
-    public void writeMethodTest(int inkContainerValue, double sizeLetter, String expectedResult) {
-        Assert.assertEquals(new Pen(inkContainerValue, sizeLetter).write("horse"), expectedResult);
+    // Three bugs (description in Readme file)
+    @Test(description = "Test for a correct work of 'write' method with positive data", dataProvider = "positiveDataForWriteMethod")
+    public void positiveWriteMethodTest(int inkContainerValue, double sizeLetter,String word, String expectedResult) {
+        Assert.assertEquals(new Pen(inkContainerValue, sizeLetter).write(word), expectedResult);
     }
+
+    // Bug (description in Readme file)
+    @Test(description = "Test for a correct work of 'write' method with positive data", dataProvider = "negativeDataForWriteMethod")
+    public void negativeWriteMethodTest(int inkContainerValue, double sizeLetter,String word, String expectedResult) {
+        Assert.assertEquals(new Pen(inkContainerValue, sizeLetter).write(word), expectedResult);
+    }
+
+    @Parameters({"testPositiveInkContainerValue", "testSizeLetter"})
+    @Test
+    public void testSecondUsageOfPen(@Optional("10") int testPositiveInkContainerValue,
+                                   @Optional("2.0") double testSizeLetter){
+        Pen pen = new Pen(testPositiveInkContainerValue,testSizeLetter);
+        pen.write("abcde");
+        Assert.assertEquals(pen.write("a"),"");
+    }
+
 }
 

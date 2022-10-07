@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 <suite name="All unit tests">
+    <parameter name="testPositiveInkContainerValue" value="10"/>
+    <parameter name="testNegativeInkContainerValue" value="-1"/>
+    <parameter name="testEmptyInkContainerValue" value="0"/>
+    <parameter name="testSizeLetter" value="2.0"/>
+    <parameter name="testColor" value="RED"/>
     <test name="all tests">
-        <packages>
-            <package name="Task1"/>
-        </packages>
+        <classes>
+            <class name="Task1.TestPen"/>
+        </classes>
     </test>
 </suite>
