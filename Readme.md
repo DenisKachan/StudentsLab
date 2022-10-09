@@ -1,5 +1,5 @@
 ***Maven code for test launch***
-`mvn test -DsuiteFile="AllUnitTests.xml"`
+`mvn test -DsuiteXmlFile="AllUnitTests.xml"`
 
 ***List of unit tests for 'Pen' class'***
 - Test of 'isWork' method with positive amount of ink;
