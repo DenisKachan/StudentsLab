@@ -122,7 +122,7 @@ public class TestPen {
     }
 
     // Bug (description in Readme file)
-    @Test(description = "Test for a correct work of 'write' method with positive data", dataProvider = "negativeDataForWriteMethod")
+    @Test(description = "Test for a correct work of 'write' method with negative data", dataProvider = "negativeDataForWriteMethod")
     public void negativeWriteMethodTest(int inkContainerValue, double sizeLetter,String word, String expectedResult) {
         Assert.assertEquals(new Pen(inkContainerValue, sizeLetter).write(word), expectedResult);
     }
